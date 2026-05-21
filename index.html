@@ -1,0 +1,931 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Pentagon — Study Tool</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --black:#0f0f0f;--dark:#1a1a1a;--mid:#555;--soft:#999;--pale:#ccc;
+  --border:#e2e2e2;--bg:#f9f9f7;--white:#ffffff;
+  --serif:'Playfair Display',Georgia,serif;
+  --sans:'DM Sans',system-ui,sans-serif;
+  --radius:10px;--shadow:0 2px 24px rgba(0,0,0,.07);
+}
+html{font-family:var(--sans);background:var(--bg);color:var(--black);font-size:15px;line-height:1.6}
+body{min-height:100vh}
+
+/* ─── Layout ─── */
+header{background:var(--white);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100;padding:0 28px}
+.header-inner{max-width:960px;margin:0 auto;height:58px;display:flex;align-items:center;justify-content:space-between}
+.logo{display:flex;align-items:baseline;gap:10px}
+.logo-name{font-family:var(--serif);font-size:22px;font-weight:700;letter-spacing:-.03em;color:var(--black)}
+.logo-tag{font-size:10px;color:var(--soft);text-transform:uppercase;letter-spacing:.12em}
+.header-actions{display:flex;gap:8px}
+
+main{max-width:960px;margin:0 auto;padding:40px 24px 80px}
+
+/* ─── Buttons ─── */
+.btn{display:inline-flex;align-items:center;gap:6px;border-radius:var(--radius);cursor:pointer;font-family:var(--sans);font-size:13px;font-weight:500;transition:all .18s;white-space:nowrap;border:1px solid var(--border)}
+.btn-primary{background:var(--black);color:var(--white);border-color:var(--black);padding:10px 20px}
+.btn-primary:hover{background:var(--dark);transform:translateY(-1px);box-shadow:0 4px 12px rgba(0,0,0,.18)}
+.btn-primary:disabled{opacity:.45;cursor:not-allowed;transform:none;box-shadow:none}
+.btn-outline{background:var(--white);color:var(--black);padding:9px 16px}
+.btn-outline:hover{border-color:var(--black);background:var(--black);color:var(--white)}
+.btn-outline:disabled{opacity:.4;cursor:not-allowed}
+.btn-ghost{background:transparent;color:var(--mid);border:none;padding:7px 10px}
+.btn-ghost:hover{color:var(--black);background:rgba(0,0,0,.04)}
+.btn-sm{padding:6px 12px;font-size:12px;border-radius:7px}
+
+/* ─── Input screen ─── */
+.hero{text-align:center;padding:24px 0 36px}
+.hero h1{font-family:var(--serif);font-size:clamp(28px,5vw,46px);font-weight:700;letter-spacing:-.03em;line-height:1.15;color:var(--black);margin-bottom:14px}
+.hero p{font-size:15px;color:var(--soft);max-width:440px;margin:0 auto;line-height:1.7}
+
+.input-card{background:var(--white);border:1px solid var(--border);border-radius:14px;padding:24px;box-shadow:var(--shadow)}
+.textarea-wrap{position:relative}
+textarea{width:100%;min-height:260px;border:none;outline:none;resize:vertical;font-family:var(--serif);font-size:15px;line-height:1.75;color:var(--dark);background:transparent;padding:0}
+textarea::placeholder{color:var(--pale)}
+.input-footer{display:flex;align-items:center;justify-content:space-between;padding-top:16px;border-top:1px solid var(--border);margin-top:12px;flex-wrap:wrap;gap:12px}
+.word-count{font-size:12px;color:var(--soft)}
+.word-count .ok{color:var(--mid)}
+.input-controls{display:flex;align-items:center;gap:16px}
+.quiz-slider{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--mid)}
+.quiz-slider input[type=range]{width:80px;accent-color:var(--black)}
+.quiz-slider strong{min-width:18px;color:var(--black)}
+
+.api-row{display:flex;align-items:center;gap:10px;margin-bottom:20px;padding:14px 18px;background:var(--white);border:1px solid var(--border);border-radius:var(--radius)}
+.api-row label{font-size:12px;color:var(--soft);white-space:nowrap;flex-shrink:0}
+.api-row input{flex:1;border:none;outline:none;font-family:var(--sans);font-size:13px;color:var(--dark);background:transparent;min-width:0}
+
+.feature-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px;margin-top:20px}
+.feature-card{padding:16px 14px;background:var(--white);border:1px solid var(--border);border-radius:var(--radius);text-align:center;transition:border-color .18s}
+.feature-card:hover{border-color:var(--pale)}
+.feature-card svg{color:var(--soft);margin-bottom:8px}
+.feature-card .fc-label{font-size:13px;font-weight:500;color:var(--black)}
+.feature-card .fc-desc{font-size:11px;color:var(--soft);margin-top:3px}
+
+/* ─── Tabs ─── */
+.tab-bar{display:flex;gap:2px;background:var(--white);border:1px solid var(--border);border-radius:12px;padding:4px;margin-bottom:24px;overflow-x:auto;scrollbar-width:none}
+.tab-bar::-webkit-scrollbar{display:none}
+.tab-btn{flex:1 0 auto;display:flex;align-items:center;justify-content:center;gap:6px;padding:9px 14px;border:none;border-radius:9px;cursor:pointer;font-family:var(--sans);font-size:12.5px;font-weight:500;transition:all .2s;white-space:nowrap;color:var(--mid);background:transparent}
+.tab-btn.active{background:var(--black);color:var(--white)}
+.tab-btn:hover:not(.active){background:rgba(0,0,0,.05);color:var(--black)}
+
+/* ─── Content card ─── */
+.content-card{background:var(--white);border:1px solid var(--border);border-radius:14px;padding:28px 30px;box-shadow:var(--shadow);min-height:380px}
+
+/* ─── Mind Map SVG area ─── */
+.mm-controls{display:flex;gap:8px;margin-bottom:12px;justify-content:flex-end;flex-wrap:wrap}
+.mm-canvas{border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;background:#fafaf9;cursor:grab;user-select:none;touch-action:none}
+.mm-canvas:active{cursor:grabbing}
+
+/* ─── Quiz ─── */
+.q-progress{display:flex;align-items:center;gap:12px;margin-bottom:24px}
+.q-bar{flex:1;height:2px;background:var(--border);border-radius:1px}
+.q-fill{height:100%;background:var(--black);border-radius:1px;transition:width .4s}
+.q-label{font-size:12px;color:var(--soft);white-space:nowrap}
+.q-type{font-size:11px;color:var(--pale);text-transform:uppercase;letter-spacing:.09em;margin-bottom:8px}
+.q-text{font-family:var(--serif);font-size:18px;color:var(--black);line-height:1.55;margin-bottom:22px}
+.q-options{display:flex;flex-direction:column;gap:9px}
+.q-opt{width:100%;display:flex;align-items:center;gap:12px;padding:13px 16px;border:1px solid var(--border);border-radius:var(--radius);cursor:pointer;font-family:var(--sans);font-size:14px;color:var(--dark);background:var(--white);text-align:left;transition:all .2s}
+.q-opt:hover:not([disabled]){border-color:var(--black)}
+.q-opt[disabled]{cursor:default}
+.q-opt.correct{background:var(--black);border-color:var(--black);color:var(--white)}
+.q-opt.wrong{background:var(--bg);color:var(--soft)}
+.q-badge{width:24px;height:24px;border:1px solid currentColor;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;flex-shrink:0;opacity:.6}
+.q-explanation{margin-top:14px;padding:12px 16px;background:var(--bg);border-radius:var(--radius);font-size:13px;color:var(--mid);line-height:1.6}
+.q-next{margin-top:16px;text-align:right}
+
+.q-result{text-align:center;padding:40px 0}
+.q-score{font-family:var(--serif);font-size:52px;font-weight:700;color:var(--black);margin-bottom:8px}
+.q-verdict{font-size:15px;color:var(--soft);margin-bottom:32px}
+
+/* ─── Flashcards ─── */
+.fc-meta{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}
+.fc-info{font-size:12px;color:var(--soft)}
+.fc-card{min-height:190px;border:1px solid var(--border);border-radius:14px;padding:40px 32px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;transition:all .32s;box-shadow:var(--shadow);position:relative}
+.fc-card.flipped{background:var(--black);border-color:var(--black)}
+.fc-side{position:absolute;top:14px;left:18px;font-size:10px;text-transform:uppercase;letter-spacing:.1em}
+.fc-card:not(.flipped) .fc-side{color:var(--pale)}
+.fc-card.flipped .fc-side{color:#555}
+.fc-hint{position:absolute;bottom:12px;font-size:10px;color:var(--pale)}
+.fc-card.flipped .fc-hint{color:#444}
+.fc-text{font-family:var(--serif);text-align:center;line-height:1.65;margin:0}
+.fc-card:not(.flipped) .fc-text{font-size:20px;color:var(--black)}
+.fc-card.flipped .fc-text{font-size:14.5px;color:var(--white)}
+.fc-nav{display:flex;justify-content:space-between;align-items:center;margin-top:16px}
+.fc-dots{display:flex;gap:4px;flex-wrap:wrap;margin-top:18px}
+.fc-dot{width:8px;height:8px;border-radius:50%;background:var(--border);cursor:pointer;transition:background .2s}
+.fc-dot.active{background:var(--black)}
+.fc-dot.known{background:var(--mid)}
+.fc-study-btns{display:flex;gap:8px}
+
+.fc-edit-box{border:1px solid var(--black);border-radius:14px;padding:20px}
+.fc-edit-box label{font-size:11px;color:var(--soft);text-transform:uppercase;letter-spacing:.09em;display:block;margin-bottom:6px}
+.fc-edit-box textarea{width:100%;border:1px solid var(--border);border-radius:7px;padding:8px 12px;font-family:var(--serif);font-size:14px;resize:vertical;outline:none;min-height:56px;color:var(--dark)}
+.fc-edit-box textarea:focus{border-color:var(--black)}
+
+/* ─── Summary ─── */
+.summary-text{font-family:var(--serif);font-size:15.5px;line-height:1.85;color:var(--dark);margin-bottom:28px}
+.takeaways-title{font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--soft);margin-bottom:14px}
+.takeaway-list{list-style:none}
+.takeaway-list li{display:flex;gap:12px;align-items:flex-start;padding:10px 0;border-bottom:1px solid var(--border);font-size:14px;color:var(--dark);line-height:1.6}
+.takeaway-num{width:22px;height:22px;border:1px solid var(--border);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;color:var(--soft);flex-shrink:0;margin-top:2px}
+
+/* ─── Glossary ─── */
+.gloss-search{width:100%;padding:9px 14px;border:1px solid var(--border);border-radius:var(--radius);font-family:var(--sans);font-size:14px;margin-bottom:16px;outline:none;transition:border-color .2s;color:var(--dark);background:var(--white)}
+.gloss-search:focus{border-color:var(--black)}
+.gloss-table{width:100%;border-collapse:collapse}
+.gloss-table th{text-align:left;padding:8px 12px;font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--soft);border-bottom:1px solid var(--border);font-weight:500}
+.gloss-table td{padding:13px 12px;border-bottom:1px solid #f4f4f2;font-size:14px;vertical-align:top;line-height:1.6}
+.gloss-table td:first-child{font-family:var(--serif);font-weight:600;color:var(--black);width:30%}
+.gloss-table td:last-child{color:var(--mid)}
+.gloss-table tr:hover td{background:var(--bg)}
+
+/* ─── Spaced Rep ─── */
+.sr-boxes{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:24px}
+.sr-box{text-align:center;padding:14px 20px;border:1px solid var(--border);border-radius:var(--radius)}
+.sr-box-count{font-family:var(--serif);font-size:24px;color:var(--black)}
+.sr-box-label{font-size:11px;color:var(--soft);margin-top:4px}
+.sr-all-done{text-align:center;padding:40px 0}
+.sr-all-done .icon{font-size:42px;margin-bottom:14px}
+.sr-all-done h3{font-family:var(--serif);font-size:22px;color:var(--black);margin-bottom:8px}
+.sr-all-done p{font-size:14px;color:var(--soft)}
+.sr-answer-btns{display:flex;gap:10px;margin-top:16px}
+.sr-answer-btns button{flex:1}
+
+/* ─── Saved sets modal ─── */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.28);z-index:200;display:flex;align-items:center;justify-content:center}
+.modal{background:var(--white);border-radius:14px;padding:28px;width:90%;max-width:480px;max-height:80vh;overflow:auto;box-shadow:0 20px 60px rgba(0,0,0,.15)}
+.modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
+.modal-header h3{font-family:var(--serif);font-size:18px;color:var(--black)}
+.saved-row{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--border)}
+.saved-row-info{flex:1;min-width:0}
+.saved-row-name{font-size:14px;color:var(--black);font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.saved-row-date{font-size:11px;color:var(--soft);margin-top:2px}
+.save-input-row{display:flex;gap:8px;margin-top:0}
+.save-input-row input{flex:1;padding:9px 12px;border:1px solid var(--border);border-radius:7px;font-family:var(--sans);font-size:13px;outline:none;color:var(--dark)}
+.save-input-row input:focus{border-color:var(--black)}
+
+/* ─── Footer actions ─── */
+.study-footer{display:flex;justify-content:space-between;align-items:center;margin-top:16px;flex-wrap:wrap;gap:8px}
+.study-footer-right{display:flex;gap:8px}
+
+/* ─── Loading / Error ─── */
+.loading-overlay{position:fixed;inset:0;background:rgba(249,249,247,.88);z-index:150;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px}
+.spinner{width:36px;height:36px;border:2.5px solid var(--border);border-top-color:var(--black);border-radius:50%;animation:spin .85s linear infinite}
+.loading-text{font-family:var(--serif);font-size:16px;color:var(--black);letter-spacing:-.01em}
+.loading-sub{font-size:13px;color:var(--soft)}
+.error-msg{margin-top:12px;padding:11px 16px;background:var(--white);border:1px solid var(--border);border-radius:var(--radius);font-size:13px;color:var(--mid)}
+
+/* ─── Web search badge ─── */
+.ws-badge{display:inline-flex;align-items:center;gap:5px;font-size:10px;color:var(--soft);padding:3px 8px;border:1px solid var(--border);border-radius:20px}
+.ws-dot{width:5px;height:5px;border-radius:50%;background:#444;animation:pulse 2s infinite}
+
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes pulse{0%,100%{opacity:.4}50%{opacity:1}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.fade-up{animation:fadeUp .38s ease both}
+
+@media(max-width:600px){
+  header{padding:0 16px}
+  main{padding:24px 16px 60px}
+  .hero h1{font-size:26px}
+  .content-card{padding:18px 16px}
+  .input-controls{flex-wrap:wrap}
+  .feature-grid{grid-template-columns:repeat(3,1fr)}
+}
+</style>
+
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0f0f0f">
+</head>
+<body>
+
+<!-- Header -->
+<header>
+  <div class="header-inner">
+    <div class="logo">
+      <span class="logo-name">Pentagon</span>
+      <span class="logo-tag">Study Tool</span>
+    </div>
+    <div class="header-actions" id="headerActions">
+      <button class="btn btn-ghost btn-sm" onclick="showSaved()" title="Saved sets">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+        Saved <span id="savedCount" style="color:var(--soft)"></span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<!-- Loading overlay -->
+<div class="loading-overlay" id="loadingOverlay" style="display:none">
+  <div class="spinner"></div>
+  <div class="loading-text">Generating your study set…</div>
+  <div class="loading-sub" id="loadingStep">Connecting to AI</div>
+</div>
+
+<!-- Saved modal -->
+<div class="modal-overlay" id="savedModal" style="display:none" onclick="if(event.target===this)closeSaved()">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>Saved Study Sets</h3>
+      <button class="btn btn-ghost btn-sm" onclick="closeSaved()">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div id="savedList"></div>
+  </div>
+</div>
+
+<!-- Save dialog -->
+<div class="modal-overlay" id="saveModal" style="display:none" onclick="if(event.target===this)closeSaveModal()">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>Save Study Set</h3>
+      <button class="btn btn-ghost btn-sm" onclick="closeSaveModal()">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="save-input-row">
+      <input id="saveNameInput" placeholder="Name this study set…" onkeydown="if(event.key==='Enter')doSave()"/>
+      <button class="btn btn-primary btn-sm" onclick="doSave()">Save</button>
+    </div>
+  </div>
+</div>
+
+<main id="mainArea">
+  <!-- Input Screen -->
+  <div id="inputScreen">
+    <div class="hero fade-up">
+      <h1>Turn any text into<br/>a complete study set.</h1>
+      <p>Paste notes, transcripts, or articles. Pentagon uses AI to instantly generate a mind map, quiz, flashcards, summary, and glossary — with live web search.</p>
+    </div>
+
+    <!-- API Key row -->
+    <div class="api-row fade-up" style="animation-delay:.05s">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>
+      <label>Gemini API Key</label>
+      <input type="password" id="apiKeyInput" placeholder="AIza..." autocomplete="off"/>
+      <span class="ws-badge"><span class="ws-dot"></span> Web Search On</span>
+    </div>
+
+    <div class="input-card fade-up" style="animation-delay:.1s">
+      <textarea id="textInput" placeholder="Paste your text here — lecture notes, a book chapter, an article…"></textarea>
+      <div class="input-footer">
+        <div class="word-count">
+          <span id="wordCountLabel">0 words · 0 chars</span>
+          <span id="wordCountHint" class="ok"></span>
+        </div>
+        <div class="input-controls">
+          <div class="quiz-slider">
+            Questions: <input type="range" min="5" max="15" value="8" id="quizCountSlider" oninput="document.getElementById('quizCountVal').textContent=this.value"/>
+            <strong id="quizCountVal">8</strong>
+          </div>
+          <button class="btn btn-primary" id="generateBtn" onclick="generate()" disabled>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+            Generate Study Set
+          </button>
+        </div>
+      </div>
+    </div>
+    <div id="inputError" class="error-msg" style="display:none"></div>
+
+    <div class="feature-grid fade-up" style="animation-delay:.16s">
+      <div class="feature-card"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg><div class="fc-label">Mind Map</div><div class="fc-desc">Interactive graph</div></div>
+      <div class="feature-card"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><div class="fc-label">Quiz</div><div class="fc-desc">Instant feedback</div></div>
+      <div class="feature-card"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg><div class="fc-label">Flashcards</div><div class="fc-desc">Flip &amp; study</div></div>
+      <div class="feature-card"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M4 7V4h16v3"/><path d="M9 20h6"/><path d="M12 4v16"/></svg><div class="fc-label">Summary</div><div class="fc-desc">Key takeaways</div></div>
+      <div class="feature-card"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/></svg><div class="fc-label">Glossary</div><div class="fc-desc">Key terms</div></div>
+      <div class="feature-card"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="m17 2 4 4-4 4"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><path d="m7 22-4-4 4-4"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg><div class="fc-label">Spaced Review</div><div class="fc-desc">Leitner boxes</div></div>
+    </div>
+  </div>
+
+  <!-- Study Screen -->
+  <div id="studyScreen" style="display:none">
+    <div class="tab-bar fade-up" id="tabBar">
+      <button class="tab-btn active" data-tab="mindmap" onclick="switchTab('mindmap',this)">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg> Mind Map
+      </button>
+      <button class="tab-btn" data-tab="quiz" onclick="switchTab('quiz',this)">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg> Quiz
+      </button>
+      <button class="tab-btn" data-tab="flashcards" onclick="switchTab('flashcards',this)">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg> Flashcards
+      </button>
+      <button class="tab-btn" data-tab="summary" onclick="switchTab('summary',this)">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7V4h16v3"/><path d="M9 20h6"/><path d="M12 4v16"/></svg> Summary
+      </button>
+      <button class="tab-btn" data-tab="glossary" onclick="switchTab('glossary',this)">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/></svg> Glossary
+      </button>
+      <button class="tab-btn" data-tab="spaced" onclick="switchTab('spaced',this)">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="m17 2 4 4-4 4"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><path d="m7 22-4-4 4-4"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg> Review
+      </button>
+    </div>
+
+    <div class="content-card fade-up" id="contentCard"></div>
+
+    <div class="study-footer">
+      <button class="btn btn-outline btn-sm" onclick="backToInput()">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+        Edit Text
+      </button>
+      <div class="study-footer-right">
+        <button class="btn btn-outline btn-sm" onclick="exportJSON()">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Export JSON
+        </button>
+        <button class="btn btn-outline btn-sm" onclick="openSaveModal()">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+          Save Set
+        </button>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script>
+// ─── State ────────────────────────────────────────────────────────────────────
+let studySet = null;
+let currentTab = 'mindmap';
+let quizState = {};
+let fcState = {};
+let srState = {};
+let mmState = { zoom:1, panX:0, panY:0, dragging:false, startX:0, startY:0, lastPanX:0, lastPanY:0 };
+
+// ─── Default text ─────────────────────────────────────────────────────────────
+document.getElementById('textInput').value = `The French Revolution (1789–1799) was a period of radical political and societal transformation in France that overthrew the monarchy, established a republic, and culminated in Napoleon Bonaparte's rise to power. It was driven by Enlightenment ideas of liberty, equality, and popular sovereignty, combined with France's severe financial crisis, food shortages, and widespread resentment of the aristocracy and clergy.
+
+The revolution began with the convening of the Estates-General in May 1789, where the Third Estate — representing common people — broke away to form the National Assembly. The storming of the Bastille on July 14, 1789, became a defining symbol of popular uprising against tyranny. The Declaration of the Rights of Man and Citizen, adopted in August 1789, enshrined principles of individual freedom and equality before the law.
+
+The revolution passed through several phases: the Constitutional Monarchy (1789–1792), the radical First French Republic (1792–1795) marked by the Reign of Terror under Robespierre and the Committee of Public Safety, and the more moderate Directory (1795–1799). The Reign of Terror saw thousands executed by guillotine in the name of revolutionary virtue and the suppression of counter-revolutionary forces.
+
+Key figures included King Louis XVI and Marie Antoinette (both executed in 1793), Maximilien Robespierre (the architect of the Terror, later himself guillotined), Georges Danton, and Jean-Paul Marat. The revolution deeply influenced modern political ideology, inspiring democratic and nationalist movements worldwide, and established the concepts of human rights, secularism, and constitutional government that continue to shape the modern world.`;
+updateWordCount();
+
+// ─── Word count ───────────────────────────────────────────────────────────────
+document.getElementById('textInput').addEventListener('input', updateWordCount);
+function updateWordCount(){
+  const t = document.getElementById('textInput').value.trim();
+  const words = t ? t.split(/\s+/).length : 0;
+  const chars = document.getElementById('textInput').value.length;
+  document.getElementById('wordCountLabel').textContent = `${words} words · ${chars} chars`;
+  const btn = document.getElementById('generateBtn');
+  const hint = document.getElementById('wordCountHint');
+  if(words >= 50){ btn.disabled=false; hint.textContent='· Ready to generate'; hint.style.color='var(--mid)'; }
+  else { btn.disabled=true; hint.textContent = words>0?`· Need ${50-words} more words`:''; hint.style.color='var(--soft)'; }
+}
+
+// ─── API call ─────────────────────────────────────────────────────────────────
+async function callClaude(userPrompt){
+  const key = document.getElementById('apiKeyInput').value.trim();
+
+  if(!key){
+    throw new Error('Please enter your Gemini API key.');
+  }
+
+  const res = await fetch(
+    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${key}`,
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        contents: [
+          {
+            parts: [
+              {
+                text: userPrompt
+              }
+            ]
+          }
+        ]
+      })
+    }
+  );
+
+  if(!res.ok){
+    throw new Error(`API error ${res.status}`);
+  }
+
+  const data = await res.json();
+
+  return data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+}
+
+function parseJSON(raw){
+  try{
+    const clean = raw.replace(/```json\s*/gi,'').replace(/```\s*/g,'').trim();
+    return JSON.parse(clean);
+  }catch(e){
+    // try to extract JSON object/array
+    const m = raw.match(/(\{[\s\S]*\}|\[[\s\S]*\])/);
+    if(m) try{ return JSON.parse(m[0]); }catch{}
+    return null;
+  }
+}
+
+// ─── Generate ─────────────────────────────────────────────────────────────────
+async function generate(){
+  const text = document.getElementById('textInput').value.trim();
+  const qCount = document.getElementById('quizCountSlider').value;
+  const errEl = document.getElementById('inputError');
+  errEl.style.display='none';
+  
+  document.getElementById('loadingOverlay').style.display='flex';
+  const steps=['Analyzing text…','Building mind map…','Writing quiz questions…','Creating flashcards…','Summarizing…','Extracting glossary…'];
+  let si=0;
+  const stepInterval = setInterval(()=>{ document.getElementById('loadingStep').textContent=steps[si++%steps.length]; },1400);
+  
+  try{
+    const truncated = text.substring(0,4000);
+    const sys = 'You are a study assistant. Respond ONLY with valid JSON. No markdown, no code fences, no explanation.';
+    
+    const [mmRaw,quizRaw,cardsRaw,summaryRaw,glossRaw] = await Promise.all([
+      callClaude(
+        `Create a mind map JSON from this text. Return EXACTLY this structure (no extra text):
+{"nodes":[{"label":"Main Topic (max 4 words)","level":0},{"label":"Key Idea","level":1,"detail":"one sentence"},{"label":"Another Idea","level":1,"detail":"one sentence"},{"label":"Sub-point","level":2,"detail":"one sentence"}]}
+Include exactly 1 level-0 node and 7-10 level-1/2 nodes. Labels must be max 4 words.
+TEXT: ${truncated}`, sys, true),
+
+      callClaude(
+        `Create exactly ${qCount} quiz questions from this text. Mix multiple-choice and true/false. Return EXACTLY:
+{"questions":[{"question":"...","type":"mc","options":["option A","option B","option C","option D"],"answer":"option A","explanation":"brief reason from text"},{"question":"...","type":"tf","options":["True","False"],"answer":"True","explanation":"..."}]}
+RULES: type is "mc" or "tf". For mc, options has 4 strings, answer must match one exactly. For tf, options is ["True","False"].
+TEXT: ${truncated}`, sys, true),
+
+      callClaude(
+        `Create 12 flashcards from this text. Return EXACTLY:
+{"cards":[{"front":"Term or concept (short)","back":"Clear explanation or definition from the text"}]}
+Focus: key terms, people, events, cause-effect, dates.
+TEXT: ${truncated}`, sys),
+
+      callClaude(
+        `Write a study summary of this text. Return EXACTLY:
+{"summary":"2-3 paragraph summary covering main ideas, context, and significance","takeaways":["specific key point 1","specific key point 2","specific key point 3","specific key point 4","specific key point 5"]}
+Summary should be informative and thorough. Takeaways should be concise but specific.
+TEXT: ${truncated}`, sys, true),
+
+      callClaude(
+        `Extract 12 key terms with definitions from this text. Return EXACTLY:
+{"terms":[{"term":"Term Name","definition":"Clear definition based on the text, 1-2 sentences"}]}
+Focus on specialized vocabulary, proper nouns, concepts, and key ideas.
+TEXT: ${truncated}`, sys),
+    ]);
+
+    const mm = parseJSON(mmRaw);
+    const quiz = parseJSON(quizRaw);
+    const cards = parseJSON(cardsRaw);
+    const summary = parseJSON(summaryRaw);
+    const gloss = parseJSON(glossRaw);
+
+    studySet = {
+      mindmap: mm?.nodes || [],
+      quiz: quiz?.questions || [],
+      flashcards: cards?.cards || [],
+      summary: summary || null,
+      glossary: gloss?.terms || []
+    };
+    
+    initQuiz();
+    initFC();
+    initSR();
+    showStudyScreen();
+    
+  }catch(e){
+    errEl.textContent = e.message || 'Generation failed. Please check your API key and try again.';
+    errEl.style.display='block';
+  }finally{
+    clearInterval(stepInterval);
+    document.getElementById('loadingOverlay').style.display='none';
+  }
+}
+
+// ─── Screen switching ─────────────────────────────────────────────────────────
+function showStudyScreen(){
+  document.getElementById('inputScreen').style.display='none';
+  document.getElementById('studyScreen').style.display='block';
+  switchTab('mindmap', document.querySelector('.tab-btn[data-tab="mindmap"]'));
+  updateHeaderActions(true);
+}
+function backToInput(){
+  document.getElementById('studyScreen').style.display='none';
+  document.getElementById('inputScreen').style.display='block';
+  updateHeaderActions(false);
+}
+function updateHeaderActions(hasStudySet){
+  const ha = document.getElementById('headerActions');
+  let html = `<button class="btn btn-ghost btn-sm" onclick="showSaved()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg> Saved <span id="savedCount" style="color:var(--soft)"></span></button>`;
+  if(hasStudySet) html = `<button class="btn btn-ghost btn-sm" onclick="backToInput()"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg> Edit</button>` + html;
+  ha.innerHTML = html;
+  updateSavedCount();
+}
+function updateSavedCount(){
+  const sc = document.getElementById('savedCount');
+  if(sc){ const sets = getSavedSets(); sc.textContent = sets.length > 0 ? `(${sets.length})` : ''; }
+}
+
+// ─── Tab switching ────────────────────────────────────────────────────────────
+function switchTab(tab, btn){
+  currentTab = tab;
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  if(btn) btn.classList.add('active');
+  const card = document.getElementById('contentCard');
+  card.innerHTML = '';
+  card.classList.remove('fade-up');
+  void card.offsetWidth;
+  card.classList.add('fade-up');
+  renderTab(tab);
+}
+function renderTab(tab){
+  const card = document.getElementById('contentCard');
+  switch(tab){
+    case 'mindmap':  card.innerHTML = renderMindMap(); setupMindMap(); break;
+    case 'quiz':     card.innerHTML = renderQuiz(); break;
+    case 'flashcards': card.innerHTML = renderFC(); setupFC(); break;
+    case 'summary':  card.innerHTML = renderSummary(); break;
+    case 'glossary': card.innerHTML = renderGlossary(); break;
+    case 'spaced':   card.innerHTML = renderSR(); break;
+  }
+}
+
+// ─── MIND MAP ─────────────────────────────────────────────────────────────────
+let mmSelected = null;
+function renderMindMap(){
+  if(!studySet.mindmap||!studySet.mindmap.length) return '<div style="color:var(--soft);text-align:center;padding:60px 0;font-size:14px">No mind map data available.</div>';
+  return `
+    <div class="mm-controls">
+      <button class="btn btn-outline btn-sm" onclick="mmZoom(0.2)"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/></svg> Zoom In</button>
+      <button class="btn btn-outline btn-sm" onclick="mmZoom(-0.2)"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="8" y1="11" x2="14" y2="11"/></svg> Zoom Out</button>
+      <button class="btn btn-outline btn-sm" onclick="mmReset()">Reset</button>
+      <button class="btn btn-outline btn-sm" onclick="exportSVG()"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Export SVG</button>
+    </div>
+    <div class="mm-canvas" id="mmCanvas" style="position:relative;height:400px">
+      <svg id="mmSvg" width="100%" height="100%" style="display:block;transform-origin:center;transition:transform .2s"></svg>
+    </div>
+    <div id="mmDetail" style="margin-top:12px;display:none;padding:12px 16px;background:var(--bg);border-radius:var(--radius);border:1px solid var(--border);font-size:13px;color:var(--mid);line-height:1.6"></div>
+  `;
+}
+function setupMindMap(){
+  const nodes = studySet.mindmap;
+  const svg = document.getElementById('mmSvg');
+  if(!svg||!nodes||!nodes.length) return;
+  
+  const W=900, H=500, cx=450, cy=250, R=160;
+  svg.setAttribute('viewBox',`0 0 ${W} ${H}`);
+  
+  const center = nodes[0];
+  const children = nodes.slice(1);
+  
+  const positions = children.map((n,i)=>{
+    const angle = (i/children.length)*2*Math.PI - Math.PI/2;
+    const r = R + (n.level===2?70:0);
+    return {x:cx+Math.cos(angle)*r, y:cy+Math.sin(angle)*r};
+  });
+  
+  let svgHTML = '';
+  // Lines
+  children.forEach((n,i)=>{
+    const p=positions[i];
+    svgHTML+=`<line x1="${cx}" y1="${cy}" x2="${p.x}" y2="${p.y}" stroke="#ddd" stroke-width="1.2" id="line${i}"/>`;
+  });
+  // Child nodes
+  children.forEach((n,i)=>{
+    const p=positions[i];
+    const lbl = n.label.length>22?n.label.substring(0,21)+'…':n.label;
+    const w=Math.max(lbl.length*6.8+20,70);
+    svgHTML+=`<g class="mm-node" onclick="selectNode(${i})" style="cursor:pointer">
+      <rect x="${p.x-w/2}" y="${p.y-17}" width="${w}" height="34" rx="7" fill="white" stroke="#d0d0d0" stroke-width="1" id="rect${i}"/>
+      <text x="${p.x}" y="${p.y+5}" text-anchor="middle" font-size="11" fill="#333" font-family="'DM Sans',sans-serif" id="txt${i}">${lbl}</text>
+    </g>`;
+  });
+  // Center
+  svgHTML+=`<ellipse cx="${cx}" cy="${cy}" rx="80" ry="34" fill="#0f0f0f"/>
+  <text x="${cx}" y="${cy+5}" text-anchor="middle" font-size="12.5" fill="white" font-family="'Playfair Display',serif" font-weight="600">${center.label.substring(0,20)}</text>`;
+  
+  svg.innerHTML = svgHTML;
+  
+  // Pan/zoom events
+  const canvas = document.getElementById('mmCanvas');
+  mmState = {zoom:1,panX:0,panY:0,dragging:false,startX:0,startY:0,lastPanX:0,lastPanY:0};
+  canvas.addEventListener('mousedown',e=>{mmState.dragging=true;mmState.startX=e.clientX-mmState.panX;mmState.startY=e.clientY-mmState.panY;});
+  canvas.addEventListener('mousemove',e=>{if(mmState.dragging){mmState.panX=e.clientX-mmState.startX;mmState.panY=e.clientY-mmState.startY;applyMMTransform();}});
+  canvas.addEventListener('mouseup',()=>mmState.dragging=false);
+  canvas.addEventListener('mouseleave',()=>mmState.dragging=false);
+  canvas.addEventListener('wheel',e=>{e.preventDefault();mmZoom(e.deltaY<0?.15:-.15);},{passive:false});
+}
+function selectNode(i){
+  const children = studySet.mindmap.slice(1);
+  const node = children[i];
+  const detail = document.getElementById('mmDetail');
+  // reset all
+  children.forEach((_,j)=>{
+    const r=document.getElementById(`rect${j}`); const t=document.getElementById(`txt${j}`); const l=document.getElementById(`line${j}`);
+    if(r){r.setAttribute('fill','white');r.setAttribute('stroke','#d0d0d0');}
+    if(t) t.setAttribute('fill','#333');
+    if(l) l.setAttribute('stroke','#ddd');
+  });
+  if(mmSelected===i){mmSelected=null;detail.style.display='none';return;}
+  mmSelected=i;
+  const r=document.getElementById(`rect${i}`); const t=document.getElementById(`txt${i}`); const l=document.getElementById(`line${i}`);
+  if(r){r.setAttribute('fill','#0f0f0f');r.setAttribute('stroke','#0f0f0f');}
+  if(t) t.setAttribute('fill','white');
+  if(l) l.setAttribute('stroke','#555');
+  if(node.detail){detail.style.display='block';detail.innerHTML=`<strong>${node.label}</strong><p style="margin-top:4px">${node.detail}</p>`;}
+}
+function mmZoom(d){mmState.zoom=Math.max(.3,Math.min(3,mmState.zoom+d));applyMMTransform();}
+function mmReset(){mmState={...mmState,zoom:1,panX:0,panY:0};applyMMTransform();}
+function applyMMTransform(){
+  const svg=document.getElementById('mmSvg');
+  if(svg) svg.style.transform=`scale(${mmState.zoom}) translate(${mmState.panX/mmState.zoom}px,${mmState.panY/mmState.zoom}px)`;
+}
+function exportSVG(){
+  const svg=document.getElementById('mmSvg');
+  if(!svg) return;
+  const ser=new XMLSerializer();
+  const str=ser.serializeToString(svg);
+  const blob=new Blob([str],{type:'image/svg+xml'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');a.href=url;a.download='pentagon-mindmap.svg';a.click();
+}
+
+// ─── QUIZ ─────────────────────────────────────────────────────────────────────
+function initQuiz(){
+  quizState = {current:0, selected:null, answers:[], done:false};
+}
+function renderQuiz(){
+  const qs = studySet.quiz;
+  if(!qs||!qs.length) return '<div style="color:var(--soft);text-align:center;padding:60px 0;font-size:14px">No quiz questions generated.</div>';
+  if(quizState.done) return renderQuizResult();
+  const q = qs[quizState.current];
+  const sel = quizState.selected;
+  const pct = (quizState.current/qs.length)*100;
+  
+  let optsHTML = q.options.map((opt,i)=>{
+    const labels=['A','B','C','D','T','F'];
+    let cls='q-opt', dis='';
+    if(sel!==null){
+      dis='disabled';
+      if(opt===q.answer) cls+=' correct';
+      else if(opt===sel) cls+=' wrong';
+    }
+    return `<button class="${cls}" ${dis} onclick="selectAnswer(${JSON.stringify(opt)})"><span class="q-badge">${labels[i]||i+1}</span>${opt}</button>`;
+  }).join('');
+  
+  let expl='';
+  if(sel!==null){
+    const correct=sel===q.answer;
+    expl=`<div class="q-explanation">${correct?'✓ Correct! ':'✗ Incorrect. '}${q.explanation||''}</div>`;
+  }
+  
+  return `
+    <div class="q-progress">
+      <div class="q-bar"><div class="q-fill" style="width:${pct}%"></div></div>
+      <span class="q-label">${quizState.current+1} / ${qs.length}</span>
+    </div>
+    <div class="q-type">${q.type==='tf'?'True or False':'Multiple Choice'}</div>
+    <div class="q-text">${q.question}</div>
+    <div class="q-options">${optsHTML}</div>
+    ${expl}
+    ${sel!==null?`<div class="q-next"><button class="btn btn-primary btn-sm" onclick="nextQuestion()">${quizState.current+1>=qs.length?'See Results':'Next Question <span style="margin-left:2px">→</span>'}</button></div>`:''}
+  `;
+}
+function renderQuizResult(){
+  const score=quizState.answers.filter(a=>a.correct).length;
+  const total=studySet.quiz.length;
+  const pct=Math.round((score/total)*100);
+  const msg=pct===100?'Perfect!':pct>=70?'Well done!':'Keep studying!';
+  return `<div class="q-result"><div class="q-score">${score}/${total}</div><div class="q-verdict">${pct}% · ${msg}</div><button class="btn btn-primary" onclick="retakeQuiz()">Retake Quiz</button></div>`;
+}
+function selectAnswer(opt){
+  if(quizState.selected!==null) return;
+  quizState.selected=opt;
+  const q=studySet.quiz[quizState.current];
+  quizState.answers.push({correct:opt===q.answer});
+  document.getElementById('contentCard').innerHTML=renderQuiz();
+}
+function nextQuestion(){
+  quizState.current++;
+  quizState.selected=null;
+  if(quizState.current>=studySet.quiz.length) quizState.done=true;
+  document.getElementById('contentCard').innerHTML=renderQuiz();
+}
+function retakeQuiz(){initQuiz();document.getElementById('contentCard').innerHTML=renderQuiz();}
+
+// ─── FLASHCARDS ───────────────────────────────────────────────────────────────
+function initFC(){
+  fcState={index:0,flipped:false,known:new Set(),review:new Set(),editing:false,studyMode:false,deck:null};
+}
+function renderFC(){
+  const cards=fcState.deck||studySet.flashcards;
+  if(!cards||!cards.length) return '<div style="color:var(--soft);text-align:center;padding:60px 0;font-size:14px">No flashcards generated.</div>';
+  const card=cards[fcState.index];
+  const isFlipped=fcState.flipped;
+  const isKnown=fcState.known.has(fcState.index);
+  
+  let cardHTML;
+  if(fcState.editing){
+    cardHTML=`<div class="fc-edit-box">
+      <div style="margin-bottom:12px"><label>Term (Front)</label><textarea id="editFront" style="min-height:56px">${card.front}</textarea></div>
+      <div style="margin-bottom:14px"><label>Definition (Back)</label><textarea id="editBack" style="min-height:72px">${card.back}</textarea></div>
+      <div style="display:flex;gap:8px"><button class="btn btn-primary btn-sm" onclick="saveEdit()">Save</button><button class="btn btn-outline btn-sm" onclick="cancelEdit()">Cancel</button></div>
+    </div>`;
+  } else {
+    cardHTML=`<div class="fc-card${isFlipped?' flipped':''}" onclick="flipCard()">
+      <div class="fc-side">${isFlipped?'Definition':'Term'}</div>
+      ${isKnown?'<div style="position:absolute;top:14px;right:16px;font-size:10px;color:#666">✓ Known</div>':''}
+      <p class="fc-text">${isFlipped?card.back:card.front}</p>
+      <div class="fc-hint">Click to flip</div>
+    </div>`;
+  }
+  
+  const allCards=fcState.deck||studySet.flashcards;
+  const dotsHTML=allCards.map((_,i)=>`<div class="fc-dot${i===fcState.index?' active':fcState.known.has(i)?' known':''}" onclick="goFC(${i})"></div>`).join('');
+  
+  let actionBtns='';
+  if(fcState.studyMode&&isFlipped){
+    actionBtns=`<div class="fc-study-btns"><button class="btn btn-outline btn-sm" onclick="markReview()">Need Review</button><button class="btn btn-primary btn-sm" onclick="markKnown()">Know It ✓</button></div>`;
+  } else if(!fcState.editing){
+    actionBtns=`<button class="btn btn-ghost btn-sm" onclick="editFC()"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg> Edit</button>`;
+  }
+  
+  return `
+    <div class="fc-meta">
+      <div class="fc-info">${fcState.index+1} of ${allCards.length} cards${fcState.known.size>0?' · '+fcState.known.size+' known':''}</div>
+      <button class="btn btn-outline btn-sm" onclick="startStudy()"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg> Study Mode</button>
+    </div>
+    ${cardHTML}
+    <div class="fc-nav" style="margin-top:14px">
+      <button class="btn btn-outline btn-sm" onclick="prevFC()" ${fcState.index===0?'disabled':''}><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="15 18 9 12 15 6"/></svg></button>
+      ${actionBtns}
+      <button class="btn btn-outline btn-sm" onclick="nextFC()" ${fcState.index>=allCards.length-1?'disabled':''}><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg></button>
+    </div>
+    <div class="fc-dots">${dotsHTML}</div>
+  `;
+}
+function setupFC(){}
+function flipCard(){fcState.flipped=!fcState.flipped;document.getElementById('contentCard').innerHTML=renderFC();}
+function prevFC(){if(fcState.index>0){fcState.index--;fcState.flipped=false;document.getElementById('contentCard').innerHTML=renderFC();}}
+function nextFC(){const d=fcState.deck||studySet.flashcards;if(fcState.index<d.length-1){fcState.index++;fcState.flipped=false;document.getElementById('contentCard').innerHTML=renderFC();}}
+function goFC(i){fcState.index=i;fcState.flipped=false;document.getElementById('contentCard').innerHTML=renderFC();}
+function editFC(){fcState.editing=true;document.getElementById('contentCard').innerHTML=renderFC();}
+function cancelEdit(){fcState.editing=false;document.getElementById('contentCard').innerHTML=renderFC();}
+function saveEdit(){
+  const f=document.getElementById('editFront').value;
+  const b=document.getElementById('editBack').value;
+  studySet.flashcards[fcState.index]={front:f,back:b};
+  fcState.editing=false;
+  document.getElementById('contentCard').innerHTML=renderFC();
+}
+function startStudy(){
+  const shuffled=[...studySet.flashcards].sort(()=>Math.random()-.5);
+  fcState.deck=shuffled;fcState.index=0;fcState.flipped=false;fcState.studyMode=true;
+  document.getElementById('contentCard').innerHTML=renderFC();
+}
+function markKnown(){fcState.known.add(fcState.index);nextFC();}
+function markReview(){fcState.review.add(fcState.index);nextFC();}
+
+// ─── SUMMARY ──────────────────────────────────────────────────────────────────
+function renderSummary(){
+  const s=studySet.summary;
+  if(!s) return '<div style="color:var(--soft);text-align:center;padding:60px 0;font-size:14px">No summary generated.</div>';
+  const tl=s.takeaways?.map((t,i)=>`<li><span class="takeaway-num">${i+1}</span>${t}</li>`).join('')||'';
+  return `<div class="summary-text">${s.summary}</div><div class="takeaways-title">Key Takeaways</div><ul class="takeaway-list">${tl}</ul>`;
+}
+
+// ─── GLOSSARY ─────────────────────────────────────────────────────────────────
+function renderGlossary(){
+  const terms=studySet.glossary;
+  if(!terms||!terms.length) return '<div style="color:var(--soft);text-align:center;padding:60px 0;font-size:14px">No glossary generated.</div>';
+  const rows=terms.map(t=>`<tr><td>${t.term}</td><td>${t.definition}</td></tr>`).join('');
+  return `
+    <input class="gloss-search" placeholder="Search terms…" oninput="filterGloss(this.value)" id="glossSearch"/>
+    <table class="gloss-table" id="glossTable"><thead><tr><th>Term</th><th>Definition</th></tr></thead><tbody id="glossBody">${rows}</tbody></table>
+  `;
+}
+function filterGloss(q){
+  const body=document.getElementById('glossBody');
+  if(!body) return;
+  body.innerHTML=studySet.glossary.filter(t=>t.term.toLowerCase().includes(q.toLowerCase())||t.definition.toLowerCase().includes(q.toLowerCase()))
+    .map(t=>`<tr><td>${t.term}</td><td>${t.definition}</td></tr>`).join('');
+}
+
+// ─── SPACED REPETITION ────────────────────────────────────────────────────────
+function initSR(){
+  const today=new Date().toISOString().split('T')[0];
+  srState={boxes:{}};
+  (studySet.flashcards||[]).forEach((c,i)=>{srState.boxes[i]={card:c,box:1,nextReview:today};});
+  srState.current=null;
+  srState.flipped=false;
+  advanceSR();
+}
+function advanceSR(){
+  const today=new Date().toISOString().split('T')[0];
+  const due=Object.entries(srState.boxes).filter(([,v])=>v.nextReview<=today);
+  srState.current=due.length>0?due[0]:null;
+  srState.flipped=false;
+}
+function renderSR(){
+  const INTERVALS=[0,1,3,7,14,30];
+  const today=new Date().toISOString().split('T')[0];
+  const dueCount=Object.values(srState.boxes).filter(v=>v.nextReview<=today).length;
+  const total=Object.keys(srState.boxes).length;
+  
+  if(!srState.current){
+    const boxCounts=Array.from({length:5},(_,i)=>Object.values(srState.boxes).filter(v=>v.box===i+1).length);
+    return `<div class="sr-all-done"><div class="icon">✓</div><h3>All caught up!</h3><p>No cards due for review today. Come back tomorrow.</p><div class="sr-boxes">${boxCounts.map((c,i)=>`<div class="sr-box"><div class="sr-box-count">${c}</div><div class="sr-box-label">Box ${i+1}</div></div>`).join('')}</div></div>`;
+  }
+  
+  const [id,item]=srState.current;
+  const card=item.card;
+  const progress=((total-dueCount)/total)*100;
+  
+  return `
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px">
+      <div style="flex:1;height:2px;background:var(--border);border-radius:1px"><div style="height:100%;width:${progress}%;background:var(--black);border-radius:1px"></div></div>
+      <span style="font-size:12px;color:var(--soft)">${dueCount} due today</span>
+    </div>
+    <div style="font-size:10px;color:var(--pale);margin-bottom:4px">Box ${item.box} of 5</div>
+    <div class="fc-card${srState.flipped?' flipped':''}" onclick="srFlip()">
+      <div class="fc-side">${srState.flipped?'Definition':'Term'}</div>
+      <p class="fc-text">${srState.flipped?card.back:card.front}</p>
+      <div class="fc-hint">Click to reveal</div>
+    </div>
+    ${srState.flipped?`<div class="sr-answer-btns">
+      <button class="btn btn-outline" onclick="srAnswer('again')">Again</button>
+      <button class="btn btn-outline" onclick="srAnswer('good')">Good</button>
+      <button class="btn btn-primary" onclick="srAnswer('easy')">Easy</button>
+    </div>`:`<button class="btn btn-outline" style="width:100%;margin-top:14px" onclick="srFlip()">Show Answer</button>`}
+  `;
+}
+function srFlip(){srState.flipped=true;document.getElementById('contentCard').innerHTML=renderSR();}
+function srAnswer(q){
+  if(!srState.current) return;
+  const INTERVALS=[0,1,3,7,14,30];
+  const [id,item]=srState.current;
+  const newBox=q==='easy'?Math.min(item.box+1,5):q==='good'?item.box:1;
+  const days=INTERVALS[newBox]||30;
+  const next=new Date();next.setDate(next.getDate()+days);
+  srState.boxes[id]={...item,box:newBox,nextReview:next.toISOString().split('T')[0]};
+  advanceSR();
+  document.getElementById('contentCard').innerHTML=renderSR();
+}
+
+// ─── SAVE / LOAD ──────────────────────────────────────────────────────────────
+function getSavedSets(){try{return JSON.parse(localStorage.getItem('pentagon_sets')||'[]');}catch{return [];}}
+function saveSets(sets){localStorage.setItem('pentagon_sets',JSON.stringify(sets));}
+function openSaveModal(){document.getElementById('saveModal').style.display='flex';setTimeout(()=>document.getElementById('saveNameInput').focus(),50);}
+function closeSaveModal(){document.getElementById('saveModal').style.display='none';document.getElementById('saveNameInput').value='';}
+function doSave(){
+  const name=document.getElementById('saveNameInput').value.trim();
+  if(!name||!studySet) return;
+  const sets=getSavedSets();
+  sets.push({name,text:document.getElementById('textInput').value,studySet,savedAt:new Date().toISOString()});
+  saveSets(sets);closeSaveModal();updateSavedCount();
+}
+function showSaved(){
+  const sets=getSavedSets();
+  const list=document.getElementById('savedList');
+  if(!sets.length){list.innerHTML='<div style="color:var(--soft);font-size:14px;text-align:center;padding:20px 0">No saved sets yet.</div>';}
+  else{list.innerHTML=sets.map((s,i)=>`<div class="saved-row"><div class="saved-row-info"><div class="saved-row-name">${s.name}</div><div class="saved-row-date">${new Date(s.savedAt).toLocaleDateString()}</div></div><button class="btn btn-outline btn-sm" onclick="loadSet(${i})">Load</button><button class="btn btn-ghost btn-sm" onclick="deleteSet(${i})" style="color:var(--pale)"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/></svg></button></div>`).join('');}
+  document.getElementById('savedModal').style.display='flex';
+}
+function closeSaved(){document.getElementById('savedModal').style.display='none';}
+function loadSet(i){
+  const sets=getSavedSets();const s=sets[i];
+  document.getElementById('textInput').value=s.text;
+  studySet=s.studySet;
+  initQuiz();initFC();initSR();
+  closeSaved();showStudyScreen();
+}
+function deleteSet(i){
+  if(!confirm('Delete this study set?')) return;
+  const sets=getSavedSets();sets.splice(i,1);saveSets(sets);showSaved();updateSavedCount();
+}
+
+// ─── EXPORT ───────────────────────────────────────────────────────────────────
+function exportJSON(){
+  if(!studySet) return;
+  const blob=new Blob([JSON.stringify({text:document.getElementById('textInput').value,studySet},null,2)],{type:'application/json'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');a.href=url;a.download='pentagon-study-set.json';a.click();
+}
+
+// ─── Init ─────────────────────────────────────────────────────────────────────
+updateSavedCount();
+</script>
+
+<script>
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('./sw.js');
+}
+</script>
+</body>
+
+</html>
